@@ -82,9 +82,9 @@ A production-grade, responsive full-stack **Telecom Billing and Customer Managem
 The server `.env` file is located at `server/.env`:
 ```env
 PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/telecom_billing
-JWT_SECRET=telecom_billing_secret_key_super_secure_2026
-JWT_EXPIRES_IN=7d
+MONGODB_URI=
+JWT_SECRET=6
+JWT_EXPIRES_IN=
 NODE_ENV=development
 ```
 
@@ -115,11 +115,11 @@ You can use the **1-Click Demo Role Switcher** buttons at the top of the app or 
 
 | Role | Email | Password | Subscriber Code | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| **Admin** | `admin@telecom.com` | `Password@123` | N/A | Full operator access, plan creation, batch billing |
-| **Support** | `support@telecom.com` | `Password@123` | N/A | Subscriber management, status toggle, CDR lookup |
-| **Customer** | `customer@telecom.com` | `Password@123` | `CUST1001` | Aarav Sharma (Active Plan: Standard Saver 499, ₹671 Bill) |
-| **Customer 2** | `riya@telecom.com` | `Password@123` | `CUST1002` | Riya Patel (Active Plan: Unlimited Pro 799) |
-| **Customer 3** | `vikram@telecom.com` | `Password@123` | `CUST1003` | Vikram Malhotra (Active Plan: Infinity Max 1299) |
+| **Admin** | `-----` | `Password@---` | N/A | Full operator access, plan creation, batch billing |
+| **Support** | `------` | `Password@---` | N/A | Subscriber management, status toggle, CDR lookup |
+| **Customer** | `------` | `Password@---` | `CUST1001` | Aarav Sharma (Active Plan: Standard Saver 499, ₹671 Bill) |
+| **Customer 2** | `-------` | `Password@---` | `CUST1002` | Riya Patel (Active Plan: Unlimited Pro 799) |
+| **Customer 3** | `--------` | `Password@---` | `CUST1003` | Vikram Malhotra (Active Plan: Infinity Max 1299) |
 
 To re-seed the sample data at any time:
 ```bash
@@ -182,31 +182,3 @@ Telecom Billing System/
 
 ---
 
-## 💡 Top 25 MERN Interview Questions & Architecture
-
-Available inside the app under the **Architecture & Q/A Guide** tab:
-1. **Explain your telecom billing project end-to-end**
-2. **Why choose MERN for telecom billing?**
-3. **React architecture & feature-based layout**
-4. **Node & Express Service Layer pattern**
-5. **Request lifecycle from React to MongoDB**
-6. **JWT authentication flow**
-7. **RBAC implementation on backend**
-8. **MongoDB collections structure**
-9. **Why usage records are kept separate from customer documents**
-10. **MongoDB indexes created for performance**
-11. **Authoritative billing calculation formula**
-12. **Why calculations belong on the backend**
-13. **Duplicate payment prevention via idempotency keys**
-14. **Payment failure handling & status reconciliation**
-15. **Centralized error handling (400, 401, 403, 404, 409, 500)**
-16. **Global state management (Redux vs Context API)**
-17. **Redux Toolkit vs Context API tradeoffs**
-18. **RTK Query / TanStack Query vs Redux**
-19. **Server-side pagination implementation**
-20. **React rendering optimizations**
-21. **Handling millions of telecom CDR usage records**
-22. **Securing billing and payment APIs**
-23. **Testing strategies for billing engines**
-24. **Deployment strategies (Docker, Nginx, CDN, MongoDB Atlas)**
-25. **Production error monitoring (Sentry, Morgan, Datadog)**

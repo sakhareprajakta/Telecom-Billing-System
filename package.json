@@ -1,0 +1,14 @@
+{
+  "name": "telecom-billing-system",
+  "version": "1.0.0",
+  "description": "Telecom Billing and Customer Management System - Complete MERN Stack",
+  "scripts": {
+    "server": "npm --prefix server run dev",
+    "client": "npm --prefix client run dev",
+    "dev": "node -e \"const { spawn } = require('child_process'); const s = spawn('npm', ['--prefix', 'server', 'run', 'dev'], { stdio: 'inherit', shell: true }); const c = spawn('npm', ['--prefix', 'client', 'run', 'dev'], { stdio: 'inherit', shell: true }); process.on('SIGINT', () => { s.kill(); c.kill(); process.exit(); });\"",
+    "seed": "npm --prefix server run seed"
+  },
+  "keywords": ["mern", "telecom", "billing", "react", "express", "mongodb", "node"],
+  "author": "",
+  "license": "ISC"
+}
