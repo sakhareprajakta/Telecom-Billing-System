@@ -6,7 +6,8 @@
     "server": "npm --prefix server run dev",
     "client": "npm --prefix client run dev",
     "dev": "node -e \"const { spawn } = require('child_process'); const s = spawn('npm', ['--prefix', 'server', 'run', 'dev'], { stdio: 'inherit', shell: true }); const c = spawn('npm', ['--prefix', 'client', 'run', 'dev'], { stdio: 'inherit', shell: true }); process.on('SIGINT', () => { s.kill(); c.kill(); process.exit(); });\"",
-    "seed": "npm --prefix server run seed"
+    "seed": "npm --prefix server run seed",
+    "test": "npm --prefix server test"
   },
   "keywords": ["mern", "telecom", "billing", "react", "express", "mongodb", "node"],
   "author": "",

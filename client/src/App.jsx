@@ -9,10 +9,12 @@ import useAuth from './hooks/useAuth';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
+import CustomerDetail from './pages/CustomerDetail';
 import Subscriptions from './pages/Subscriptions';
 import Usage from './pages/Usage';
 import Billing from './pages/Billing';
 import Invoices from './pages/Invoices';
+import InvoiceDetail from './pages/InvoiceDetail';
 import Payments from './pages/Payments';
 import InterviewGuide from './pages/InterviewGuide';
 
@@ -29,11 +31,13 @@ function AppLayout() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SUPPORT']} />}>
               <Route path="/customers" element={<Customers />} />
+              <Route path="/customers/:id" element={<CustomerDetail />} />
             </Route>
             <Route path="/subscriptions" element={<Subscriptions />} />
             <Route path="/usage" element={<Usage />} />
             <Route path="/billing" element={<Billing />} />
             <Route path="/invoices" element={<Invoices />} />
+            <Route path="/invoices/:id" element={<InvoiceDetail />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/interview-guide" element={<InterviewGuide />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />

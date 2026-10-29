@@ -5,6 +5,8 @@ import DataTable from '../components/common/DataTable';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import InvoiceDetails from '../components/billing/InvoiceDetails';
+import InvoiceFilter from '../components/billing/InvoiceFilter';
+import InvoiceTable from '../components/billing/InvoiceTable';
 import PaymentModal from '../components/payment/PaymentModal';
 import { formatCurrency, formatDate, getStatusBadgeColor } from '../utils/formatters';
 import {
@@ -173,48 +175,23 @@ const Invoices = () => {
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 font-semibold text-slate-700">
-            <Filter className="w-4 h-4 text-slate-400" /> Filter:
-          </div>
+      {/* Filter Bar (Page 11 InvoiceFilter) */}
+      <InvoiceFilter
+        status={status}
+        setStatus={setStatus}
+        billingPeriod={billingPeriod}
+        setBillingPeriod={setBillingPeriod}
+      />
 
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">All Statuses (PENDING, PAID, OVERDUE)</option>
-            <option value="PENDING">PENDING</option>
-            <option value="PAID">PAID</option>
-            <option value="OVERDUE">OVERDUE</option>
-          </select>
-
-          <select
-            value={billingPeriod}
-            onChange={(e) => setBillingPeriod(e.target.value)}
-            className="px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">All Billing Periods</option>
-            <option value="2026-10">2026-10 (Current)</option>
-            <option value="2026-09">2026-09 (Prior)</option>
-          </select>
-        </div>
-
-        <span className="text-slate-400">
-          Showing invoices matching current RBAC authorization scope.
-        </span>
-      </div>
-
-      {/* Invoices Table */}
-      <DataTable
-        columns={columns}
-        data={invoices}
+      {/* Invoices Table (Page 11 InvoiceTable with InvoiceRow) */}
+      <InvoiceTable
+        invoices={invoices}
         loading={loading}
         pagination={pagination}
         onPageChange={(p) => fetchInvoices(p)}
-        emptyMessage="No invoices found."
+        onSelectDetail={(inv) => setSelectedInvoiceDetail(inv)}
+        onPayNow={(inv) => setSelectedInvoiceForPay(inv)}
+        userName={user?.name}
       />
 
       {/* Invoice Details Modal */}

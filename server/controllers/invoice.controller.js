@@ -55,7 +55,37 @@ export const getInvoiceById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const invoice = await Invoice.findById(id).populate({
+    // Check if `id` is a customerCode (e.g., CUST1001) as in PDF Page 10 Section 22: GET /api/invoices/CUST1001
+    if (id.toUpperCase().startsWith('CUST')) {
+      const customer = await Customer.findOne({ customerCode: id.toUpperCase() });
+      if (!customer) {
+        return res.status(404).json({ success: false, message: `Customer ${id} not found.` });
+      }
+
+      // RBAC check
+      if (req.user && req.user.role === 'CUSTOMER') {
+        const ownCustomer = await Customer.findOne({ userId: req.user._id });
+        if (!ownCustomer || ownCustomer._id.toString() !== customer._id.toString()) {
+          return res.status(403).json({ success: false, message: 'Access denied to these invoices.' });
+        }
+      }
+
+      const invoices = await Invoice.find({ customerId: customer._id }).sort({ createdAt: -1 });
+      return res.status(200).json({
+        success: true,
+        data: invoices,
+      });
+    }
+
+    // Check if `id` is an invoiceNumber (e.g., INV10001) or MongoDB ObjectId
+    let query = {};
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      query._id = id;
+    } else {
+      query.invoiceNumber = id.toUpperCase();
+    }
+
+    const invoice = await Invoice.findOne(query).populate({
       path: 'customerId',
       select: 'customerCode phone userId address accountStatus',
       populate: { path: 'userId', select: 'name email' },

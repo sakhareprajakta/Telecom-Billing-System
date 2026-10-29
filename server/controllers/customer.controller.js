@@ -73,17 +73,18 @@ export const getCustomerById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
+    const query = id.match(/^[0-9a-fA-F]{24}$/) ? { _id: id } : { customerCode: id.toUpperCase() };
+    const customer = await Customer.findOne(query).populate('userId', 'name email role status');
+    if (!customer) {
+      return res.status(404).json({ success: false, message: 'Customer record not found.' });
+    }
+
     // RBAC check: Customers can only fetch their own profile unless ADMIN or SUPPORT
     if (req.user.role === 'CUSTOMER') {
       const ownCustomer = await Customer.findOne({ userId: req.user._id });
-      if (!ownCustomer || ownCustomer._id.toString() !== id) {
+      if (!ownCustomer || ownCustomer._id.toString() !== customer._id.toString()) {
         return res.status(403).json({ success: false, message: 'You are not authorized to view other customer records.' });
       }
-    }
-
-    const customer = await Customer.findById(id).populate('userId', 'name email role status');
-    if (!customer) {
-      return res.status(404).json({ success: false, message: 'Customer record not found.' });
     }
 
     // Active subscription
