@@ -174,7 +174,7 @@ const Subscriptions = () => {
             key={plan._id}
             plan={plan}
             isCurrent={currentPlanId === plan._id}
-            onSubscribe={handleSubscribe}
+            onSubscribe={role === 'CUSTOMER' ? handleSubscribe : null}
             loading={actionLoading}
           />
         ))}

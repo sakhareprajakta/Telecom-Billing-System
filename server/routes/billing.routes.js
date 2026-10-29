@@ -8,7 +8,7 @@ const router = express.Router();
 router.use(protect);
 
 router.post('/preview', previewBill);
-router.post('/generate', authorize('ADMIN', 'SUPPORT'), generateBill);
+router.post('/generate', authorize('ADMIN'), generateBill);
 router.post('/cycle', authorize('ADMIN'), runBillingCycle);
 
 export default router;

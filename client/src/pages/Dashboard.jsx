@@ -24,6 +24,7 @@ import {
   Wifi,
   Sparkles,
   RefreshCw,
+  ShieldCheck,
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -71,24 +72,34 @@ const Dashboard = () => {
       {/* Top Banner Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
         <div>
-          <span className="text-xs uppercase font-extrabold tracking-wider text-blue-600">
-            {role} Portal
+          <span className={`text-xs uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-md border ${
+            role === 'ADMIN'
+              ? 'bg-purple-50 text-purple-700 border-purple-200'
+              : role === 'SUPPORT'
+              ? 'bg-amber-50 text-amber-700 border-amber-200'
+              : 'bg-blue-50 text-blue-700 border-blue-200'
+          }`}>
+            {role === 'ADMIN' && 'Telecom Operator Executive Console'}
+            {role === 'SUPPORT' && 'Customer Support & Helpdesk'}
+            {role === 'CUSTOMER' && 'Customer Self-Care Portal'}
           </span>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight mt-0.5">
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight mt-2">
             Welcome back, {user?.name}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             {isCustomer
-              ? `Account Code: ${data?.customer?.customerCode || 'CUST1001'} • Network Status: 5G Active`
-              : 'Telecom Operator Centralized Telemetry & Operations'}
+              ? `Account Code: ${data?.customer?.customerCode || 'CUST1001'} • 5G Network Active`
+              : role === 'SUPPORT'
+              ? 'Customer Service Queue, SIM Account Status & Subscriber Resolution'
+              : 'Enterprise Telecom Billing Engine, Telemetry & Revenue Operations'}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" icon={RefreshCw} onClick={fetchDashboardData}>
-            Refresh Telemetry
+            Refresh
           </Button>
-          {!isCustomer && (
+          {role === 'ADMIN' && (
             <Link to="/billing">
               <Button variant="primary" size="sm" icon={Calculator}>
                 Run Billing Engine
@@ -270,10 +281,219 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      ) : (
-        /* OPERATOR / ADMIN / SUPPORT DASHBOARD */
+      ) : role === 'SUPPORT' ? (
+        /* CUSTOMER SUPPORT DESK DASHBOARD */
         <div className="space-y-6">
-          {/* Key Metric Stat Cards */}
+          {/* Support Desk Metrics - NO Company Total Revenue */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              title="Managed Subscribers"
+              value={data?.totalCustomers || 0}
+              subtext="Registered customer accounts"
+              icon={Users}
+              color="indigo"
+            />
+            <StatCard
+              title="Active Lines / SIMs"
+              value={data?.activeSubscriptionsCount || 0}
+              subtext="Operational 5G subscriptions"
+              icon={Activity}
+              color="emerald"
+            />
+            <StatCard
+              title="Suspended Accounts"
+              value={data?.suspendedCustomersCount || 0}
+              subtext="Flagged / pending verification"
+              icon={AlertCircle}
+              color="rose"
+            />
+            <StatCard
+              title="Unpaid Customer Invoices"
+              value={data?.pendingInvoicesCount || 0}
+              subtext="Invoices pending payment"
+              icon={FileText}
+              color="amber"
+            />
+          </div>
+
+          {/* Support Middle Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-sm font-bold text-slate-800">
+                  Network Usage Telemetry (For Customer Inquiries)
+                </h3>
+                <Link to="/usage" className="text-xs text-blue-600 font-semibold hover:underline">
+                  View CDR Feed →
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-blue-50/60 border border-blue-100 p-4 rounded-xl text-center">
+                  <span className="text-xs text-blue-600 font-semibold uppercase">5G / 4G Data</span>
+                  <p className="text-2xl font-black text-slate-900 mt-1">
+                    {data?.usageBreakdown?.find((u) => u._id === 'DATA')?.totalQuantity?.toFixed(1) || '32.5'}{' '}
+                    <span className="text-xs font-normal text-slate-500">GB</span>
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-1">Active data traffic</p>
+                </div>
+
+                <div className="bg-indigo-50/60 border border-indigo-100 p-4 rounded-xl text-center">
+                  <span className="text-xs text-indigo-600 font-semibold uppercase">Voice Calls</span>
+                  <p className="text-2xl font-black text-slate-900 mt-1">
+                    {data?.usageBreakdown?.find((u) => u._id === 'VOICE')?.totalQuantity || '635'}{' '}
+                    <span className="text-xs font-normal text-slate-500">Mins</span>
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-1">VoLTE minutes</p>
+                </div>
+
+                <div className="bg-emerald-50/60 border border-emerald-100 p-4 rounded-xl text-center">
+                  <span className="text-xs text-emerald-600 font-semibold uppercase">SMS Traffic</span>
+                  <p className="text-2xl font-black text-slate-900 mt-1">
+                    {data?.usageBreakdown?.find((u) => u._id === 'SMS')?.totalQuantity || '120'}{' '}
+                    <span className="text-xs font-normal text-slate-500">SMS</span>
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-1">SMS count</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Support Quick Actions Panel - NO Billing Engine */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-3">
+              <h3 className="text-sm font-bold text-slate-800 pb-2 border-b border-slate-100">
+                Support Quick Actions
+              </h3>
+
+              <div className="space-y-2">
+                <Link to="/customers" className="block">
+                  <div className="p-3 rounded-xl border border-slate-200 hover:border-amber-400 hover:bg-amber-50/40 transition-all flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 block">
+                        Customer Directory & Lookup
+                      </span>
+                      <span className="text-[11px] text-slate-500">
+                        View 360° profile, change account status
+                      </span>
+                    </div>
+                    <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                  </div>
+                </Link>
+
+                <Link to="/usage" className="block">
+                  <div className="p-3 rounded-xl border border-slate-200 hover:border-amber-400 hover:bg-amber-50/40 transition-all flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 block">
+                        Subscriber CDR Usage Lookup
+                      </span>
+                      <span className="text-[11px] text-slate-500">
+                        Investigate data and voice event logs
+                      </span>
+                    </div>
+                    <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                  </div>
+                </Link>
+
+                <Link to="/invoices" className="block">
+                  <div className="p-3 rounded-xl border border-slate-200 hover:border-amber-400 hover:bg-amber-50/40 transition-all flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 block">
+                        Verify Customer Invoices
+                      </span>
+                      <span className="text-[11px] text-slate-500">
+                        Check payment status & breakdown
+                      </span>
+                    </div>
+                    <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                  </div>
+                </Link>
+
+                <Link to="/subscriptions" className="block">
+                  <div className="p-3 rounded-xl border border-slate-200 hover:border-amber-400 hover:bg-amber-50/40 transition-all flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 block">
+                        5G Tariff Catalog Reference
+                      </span>
+                      <span className="text-[11px] text-slate-500">
+                        Browse active plans to advise customers
+                      </span>
+                    </div>
+                    <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                  </div>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Grid: Recent Invoices & Recent Transactions */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h3 className="text-sm font-bold text-slate-800">Customer Invoices</h3>
+                <Link to="/invoices" className="text-xs text-blue-600 font-semibold hover:underline">
+                  All Invoices →
+                </Link>
+              </div>
+              <div className="space-y-2">
+                {data?.recentInvoices?.map((inv) => (
+                  <div
+                    key={inv._id}
+                    onClick={() => setSelectedInvoiceDetail(inv)}
+                    className="p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center justify-between text-xs cursor-pointer transition-colors"
+                  >
+                    <div>
+                      <span className="font-bold text-blue-600">{inv.invoiceNumber}</span>
+                      <span className="text-slate-500 ml-2">
+                        {inv.customerId?.customerCode || 'CUST'} ({inv.billingPeriod})
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-900">{formatCurrency(inv.totalAmount)}</span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase ${getStatusBadgeColor(
+                          inv.status
+                        )}`}
+                      >
+                        {inv.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h3 className="text-sm font-bold text-slate-800">Recent Customer Payments</h3>
+                <Link to="/payments" className="text-xs text-blue-600 font-semibold hover:underline">
+                  All Payments →
+                </Link>
+              </div>
+              <div className="space-y-2">
+                {data?.recentPayments?.map((p) => (
+                  <div
+                    key={p._id}
+                    className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs"
+                  >
+                    <div>
+                      <span className="font-bold text-slate-800 font-mono">{p.transactionId}</span>
+                      <p className="text-[11px] text-slate-500">
+                        {p.customerId?.customerCode} • {p.paymentMethod}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-bold text-emerald-600">{formatCurrency(p.amount)}</span>
+                      <span className="text-[10px] text-slate-400 block">{formatDate(p.paidAt)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* ADMIN EXECUTIVE DASHBOARD */
+        <div className="space-y-6">
+          {/* Key Metric Stat Cards - Includes Total Revenue & Receivables */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               title="Total Billed Revenue"
@@ -346,37 +566,26 @@ const Dashboard = () => {
                   <p className="text-[11px] text-slate-500 mt-1">Total messages sent</p>
                 </div>
               </div>
-
-              {/* Formula & Engine info box */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 space-y-1">
-                <span className="font-bold text-slate-800">
-                  Backend Rule: Authoritative Billing Execution
-                </span>
-                <p>
-                  The frontend never computes bill amounts autoritatively. All calculations occur in{' '}
-                  <code className="text-blue-600 font-mono">billing.service.js</code> using base rates, excess usage meters, and GST surcharge.
-                </p>
-              </div>
             </div>
 
-            {/* Quick Actions Panel */}
+            {/* Admin Quick Actions Panel */}
             <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-3">
               <h3 className="text-sm font-bold text-slate-800 pb-2 border-b border-slate-100">
-                Operator Quick Actions
+                Operator Executive Actions
               </h3>
 
               <div className="space-y-2">
                 <Link to="/billing" className="block">
-                  <div className="p-3 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/40 transition-all flex items-center justify-between">
+                  <div className="p-3 rounded-xl border border-purple-200 bg-purple-50/30 hover:border-purple-400 hover:bg-purple-50/60 transition-all flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-bold text-slate-800 block">
+                      <span className="text-xs font-bold text-purple-950 block">
                         Billing Engine Calculator
                       </span>
-                      <span className="text-[11px] text-slate-500">
-                        Calculate or generate customer bill
+                      <span className="text-[11px] text-purple-700">
+                        Batch cycles & invoice generation
                       </span>
                     </div>
-                    <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                    <ArrowUpRight className="w-4 h-4 text-purple-600" />
                   </div>
                 </Link>
 
@@ -408,17 +617,17 @@ const Dashboard = () => {
                   </div>
                 </Link>
 
-                <Link to="/interview-guide" className="block">
-                  <div className="p-3 rounded-xl border border-amber-200 bg-amber-50/50 hover:bg-amber-100/50 transition-all flex items-center justify-between">
+                <Link to="/customers" className="block">
+                  <div className="p-3 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/40 transition-all flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-bold text-amber-900 block flex items-center gap-1">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Architecture & Q&A
+                      <span className="text-xs font-bold text-slate-800 block">
+                        Customer Accounts Directory
                       </span>
-                      <span className="text-[11px] text-amber-700">
-                        25 MERN interview answers & flows
+                      <span className="text-[11px] text-slate-500">
+                        Manage all subscribers & account states
                       </span>
                     </div>
-                    <ArrowUpRight className="w-4 h-4 text-amber-600" />
+                    <ArrowUpRight className="w-4 h-4 text-slate-400" />
                   </div>
                 </Link>
               </div>

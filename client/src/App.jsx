@@ -18,6 +18,7 @@ import InvoiceDetail from './pages/InvoiceDetail';
 import Payments from './pages/Payments';
 import InterviewGuide from './pages/InterviewGuide';
 
+
 function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -35,7 +36,9 @@ function AppLayout() {
             </Route>
             <Route path="/subscriptions" element={<Subscriptions />} />
             <Route path="/usage" element={<Usage />} />
-            <Route path="/billing" element={<Billing />} />
+            <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+              <Route path="/billing" element={<Billing />} />
+            </Route>
             <Route path="/invoices" element={<Invoices />} />
             <Route path="/invoices/:id" element={<InvoiceDetail />} />
             <Route path="/payments" element={<Payments />} />

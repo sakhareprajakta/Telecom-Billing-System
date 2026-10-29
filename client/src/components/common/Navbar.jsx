@@ -17,12 +17,11 @@ import { reportApi } from '../../services/reportApi';
 import { formatDateTime } from '../../utils/formatters';
 
 const Navbar = ({ onToggleSidebar }) => {
-  const { user, role, logout, quickSwitch } = useAuth();
+  const { user, role, logout } = useAuth();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifs, setShowNotifs] = useState(false);
-  const [switching, setSwitching] = useState(false);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -108,44 +107,21 @@ const Navbar = ({ onToggleSidebar }) => {
             </Link>
           </div>
 
-          {/* Center: Quick Role Switcher for seamless demo/interview testing */}
-          <div className="hidden md:flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60">
-            <span className="text-[11px] font-semibold text-slate-600 px-2 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-500" /> Demo Role:
-            </span>
-            <button
-              onClick={() => handleQuickSwitch('ADMIN')}
-              disabled={switching}
-              className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
-                role === 'ADMIN'
-                  ? 'bg-purple-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-white'
-              }`}
-            >
-              Admin
-            </button>
-            <button
-              onClick={() => handleQuickSwitch('SUPPORT')}
-              disabled={switching}
-              className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
-                role === 'SUPPORT'
-                  ? 'bg-amber-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-white'
-              }`}
-            >
-              Support
-            </button>
-            <button
-              onClick={() => handleQuickSwitch('CUSTOMER')}
-              disabled={switching}
-              className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
-                role === 'CUSTOMER'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-white'
-              }`}
-            >
-              Customer
-            </button>
+          {/* Center: Authoritative Active Role Badge */}
+          <div className="hidden md:flex items-center gap-2">
+            <div className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-2 shadow-xs ${getRoleBadgeStyle(role)}`}>
+              <Shield className="w-3.5 h-3.5" />
+              <span>
+                {role === 'ADMIN' && 'Telecom Administrator Console'}
+                {role === 'SUPPORT' && 'Customer Support & Helpdesk'}
+                {role === 'CUSTOMER' && 'Customer Self-Care Portal'}
+              </span>
+            </div>
+            {role === 'CUSTOMER' && user?.customer?.customerCode && (
+              <span className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+                {user.customer.customerCode}
+              </span>
+            )}
           </div>
 
           {/* Right User Actions */}

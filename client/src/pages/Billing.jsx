@@ -268,9 +268,7 @@ const Billing = () => {
               >
                 Generate Tax Invoice Document
               </Button>
-              <p className="text-[11px] text-slate-400 text-center">
-                Commits invoice to MongoDB and links CDR records.
-              </p>
+              
             </div>
           )}
         </div>

@@ -79,7 +79,7 @@ const PlanCard = ({ plan, isCurrent = false, onSubscribe, loading = false }) => 
           <Button variant="secondary" disabled className="w-full">
             Currently Subscribed
           </Button>
-        ) : (
+        ) : onSubscribe ? (
           <Button
             variant="primary"
             loading={loading}
@@ -88,6 +88,10 @@ const PlanCard = ({ plan, isCurrent = false, onSubscribe, loading = false }) => 
           >
             Select Plan
           </Button>
+        ) : (
+          <div className="w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold text-center border border-slate-200">
+            Available 5G Offering
+          </div>
         )}
       </div>
     </div>

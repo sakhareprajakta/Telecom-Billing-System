@@ -59,7 +59,15 @@ export const updatePlan = async (req, res, next) => {
 
 export const subscribeCustomerToPlan = async (req, res, next) => {
   try {
-    const { customerId, planId } = req.body;
+    let { customerId, planId } = req.body;
+
+    if (req.user && req.user.role === 'CUSTOMER') {
+      const ownCustomer = await Customer.findOne({ userId: req.user._id });
+      if (!ownCustomer) {
+        return res.status(404).json({ success: false, message: 'Customer record not found.' });
+      }
+      customerId = ownCustomer._id;
+    }
 
     const [customer, plan] = await Promise.all([
       Customer.findById(customerId),

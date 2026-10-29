@@ -170,13 +170,15 @@ const Usage = () => {
       <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
         <div>
           <span className="text-xs uppercase font-extrabold tracking-wider text-blue-600">
-            CDR Telemetry & Ingestion
+            {role === 'CUSTOMER' ? 'Personal Telemetry' : role === 'SUPPORT' ? 'Support Desk Telemetry' : 'CDR Telemetry & Ingestion'}
           </span>
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight mt-0.5">
-            Telecom Usage Records
+            {role === 'CUSTOMER' ? 'My Data & Network Usage' : role === 'SUPPORT' ? 'Subscriber CDR Usage Lookup' : 'Telecom Usage Records'}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Real-time Call Detail Records (CDR) indexed by <code className="font-mono text-blue-600">&#123; customerId: 1, usageDate: -1 &#125;</code>
+            {role === 'CUSTOMER'
+              ? 'Real-time record of your 5G data sessions, voice calls, and SMS usage.'
+              : 'Call Detail Records (CDR)'}
           </p>
         </div>
 
@@ -190,27 +192,33 @@ const Usage = () => {
           >
             Export CSV
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            icon={Zap}
-            loading={simulating}
-            onClick={handleSimulateStream}
-            className="text-amber-700 hover:bg-amber-50 border-amber-200"
-          >
-            Simulate Traffic Stream
-          </Button>
+
           <Button variant="outline" size="sm" icon={RefreshCw} onClick={() => fetchUsageData(1)}>
             Refresh
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            icon={Plus}
-            onClick={() => setShowLogModal(true)}
-          >
-            Log CDR Event
-          </Button>
+
+          {role === 'ADMIN' && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={Zap}
+                loading={simulating}
+                onClick={handleSimulateStream}
+                className="text-amber-700 hover:bg-amber-50 border-amber-200"
+              >
+                Simulate Traffic Stream
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={Plus}
+                onClick={() => setShowLogModal(true)}
+              >
+                Log CDR Event
+              </Button>
+            </>
+          )}
         </div>
       </div>
 

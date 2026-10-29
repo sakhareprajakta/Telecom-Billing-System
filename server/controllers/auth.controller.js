@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import Customer from '../models/Customer.js';
+import Plan from '../models/Plan.js';
+import Subscription from '../models/Subscription.js';
 import { validateRegistration } from '../validators/validator.js';
 
 const generateToken = (id, role) => {
@@ -49,6 +51,17 @@ export const register = async (req, res, next) => {
         },
         accountStatus: 'ACTIVE',
       });
+
+      // Automatically assign default 5G starter plan
+      const defaultPlan = (await Plan.findOne({ planCode: 'PLAN499' })) || (await Plan.findOne({ status: 'ACTIVE' }));
+      if (defaultPlan) {
+        await Subscription.create({
+          customerId: customer._id,
+          planId: defaultPlan._id,
+          startDate: new Date(),
+          status: 'ACTIVE',
+        });
+      }
     }
 
     const token = generateToken(user._id, user.role);
@@ -72,7 +85,7 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, requiredRole } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide both email and password.' });
@@ -92,11 +105,43 @@ export const login = async (req, res, next) => {
       return res.status(403).json({ success: false, message: 'Your account is deactivated. Contact support.' });
     }
 
+    // Role-based Authorization: verify that user's registered role matches the login tab portal
+    if (requiredRole && user.role !== requiredRole) {
+      return res.status(403).json({
+        success: false,
+        message: `Access Denied: Your account '${user.email}' is registered as '${user.role}'. You cannot log in through the '${requiredRole}' portal. Please select the '${user.role}' tab to log in.`,
+      });
+    }
+
     const token = generateToken(user._id, user.role);
 
     let customer = null;
     if (user.role === 'CUSTOMER') {
       customer = await Customer.findOne({ userId: user._id });
+      if (!customer) {
+        const count = await Customer.countDocuments();
+        customer = await Customer.create({
+          userId: user._id,
+          customerCode: `CUST${1001 + count}`,
+          phone: '+1 (555) 019-2834',
+          address: {
+            street: '124 Innovation Way',
+            city: 'San Jose',
+            state: 'CA',
+            pincode: '95112',
+          },
+          accountStatus: 'ACTIVE',
+        });
+        const defaultPlan = (await Plan.findOne({ planCode: 'PLAN499' })) || (await Plan.findOne({ status: 'ACTIVE' }));
+        if (defaultPlan) {
+          await Subscription.create({
+            customerId: customer._id,
+            planId: defaultPlan._id,
+            startDate: new Date(),
+            status: 'ACTIVE',
+          });
+        }
+      }
     }
 
     res.status(200).json({
@@ -122,6 +167,30 @@ export const getMe = async (req, res, next) => {
     let customer = null;
     if (user.role === 'CUSTOMER') {
       customer = await Customer.findOne({ userId: user._id });
+      if (!customer) {
+        const count = await Customer.countDocuments();
+        customer = await Customer.create({
+          userId: user._id,
+          customerCode: `CUST${1001 + count}`,
+          phone: '+1 (555) 019-2834',
+          address: {
+            street: '124 Innovation Way',
+            city: 'San Jose',
+            state: 'CA',
+            pincode: '95112',
+          },
+          accountStatus: 'ACTIVE',
+        });
+        const defaultPlan = (await Plan.findOne({ planCode: 'PLAN499' })) || (await Plan.findOne({ status: 'ACTIVE' }));
+        if (defaultPlan) {
+          await Subscription.create({
+            customerId: customer._id,
+            planId: defaultPlan._id,
+            startDate: new Date(),
+            status: 'ACTIVE',
+          });
+        }
+      }
     }
 
     res.status(200).json({

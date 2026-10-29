@@ -31,8 +31,8 @@ export const AuthProvider = ({ children }) => {
     verifyUser();
   }, [token]);
 
-  const login = async (email, password) => {
-    const res = await authApi.login({ email, password });
+  const login = async (email, password, requiredRole) => {
+    const res = await authApi.login({ email, password, requiredRole });
     if (res.success) {
       setToken(res.token);
       setUser(res.user);
@@ -60,15 +60,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
-  // Quick switch for demo purposes (Admin, Support, Customer)
-  const quickSwitch = async (roleType) => {
-    let email = 'customer@telecom.com';
-    if (roleType === 'ADMIN') email = 'admin@telecom.com';
-    if (roleType === 'SUPPORT') email = 'support@telecom.com';
-
-    return await login(email, 'Password@123');
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -80,7 +71,6 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
-        quickSwitch,
       }}
     >
       {children}

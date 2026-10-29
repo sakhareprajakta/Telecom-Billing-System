@@ -8,7 +8,6 @@ import {
   Calculator,
   FileText,
   CreditCard,
-  BookOpen,
   X,
   ShieldCheck,
 } from 'lucide-react';
@@ -18,59 +17,41 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { role } = useAuth();
   const isAdminOrSupport = role === 'ADMIN' || role === 'SUPPORT';
 
-  const navItems = [
-    {
-      to: '/dashboard',
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      roles: ['ADMIN', 'SUPPORT', 'CUSTOMER'],
-    },
-    {
-      to: '/customers',
-      label: 'Customers',
-      icon: Users,
-      roles: ['ADMIN', 'SUPPORT'],
-    },
-    {
-      to: '/subscriptions',
-      label: 'Plans & Plans Catalog',
-      icon: Layers,
-      roles: ['ADMIN', 'SUPPORT', 'CUSTOMER'],
-    },
-    {
-      to: '/usage',
-      label: 'Usage & CDR Tracking',
-      icon: Activity,
-      roles: ['ADMIN', 'SUPPORT', 'CUSTOMER'],
-    },
-    {
-      to: '/billing',
-      label: 'Billing Engine',
-      icon: Calculator,
-      roles: ['ADMIN', 'SUPPORT', 'CUSTOMER'],
-    },
-    {
-      to: '/invoices',
-      label: 'Invoices',
-      icon: FileText,
-      roles: ['ADMIN', 'SUPPORT', 'CUSTOMER'],
-    },
-    {
-      to: '/payments',
-      label: 'Payment Gateway',
-      icon: CreditCard,
-      roles: ['ADMIN', 'SUPPORT', 'CUSTOMER'],
-    },
-    {
-      to: '/interview-guide',
-      label: 'Architecture & Q/A Guide',
-      icon: BookOpen,
-      roles: ['ADMIN', 'SUPPORT', 'CUSTOMER'],
-      highlight: true,
-    },
-  ];
+  const getNavItems = () => {
+    if (role === 'CUSTOMER') {
+      return [
+        { to: '/dashboard', label: 'My Dashboard', icon: LayoutDashboard },
+        { to: '/subscriptions', label: '5G Tariff Plans', icon: Layers },
+        { to: '/usage', label: 'My Data & Usage', icon: Activity },
+        { to: '/invoices', label: 'My Invoices', icon: FileText },
+        { to: '/payments', label: 'My Payments', icon: CreditCard },
+      ];
+    }
 
-  const filteredItems = navItems.filter((item) => item.roles.includes(role));
+    if (role === 'SUPPORT') {
+      return [
+        { to: '/dashboard', label: 'Support Helpdesk', icon: LayoutDashboard },
+        { to: '/customers', label: 'Customer Directory', icon: Users },
+        { to: '/subscriptions', label: 'Tariff Plans', icon: Layers },
+        { to: '/usage', label: 'CDR Usage Lookup', icon: Activity },
+        { to: '/invoices', label: 'Customer Invoices', icon: FileText },
+        { to: '/payments', label: 'Payment Records', icon: CreditCard },
+      ];
+    }
+
+    // Default: ADMIN
+    return [
+      { to: '/dashboard', label: 'Executive Dashboard', icon: LayoutDashboard },
+      { to: '/customers', label: 'Customer Accounts', icon: Users },
+      { to: '/subscriptions', label: 'Plans & Tariff Catalog', icon: Layers },
+      { to: '/usage', label: 'Usage & CDR Telemetry', icon: Activity },
+      { to: '/billing', label: 'Billing Engine', icon: Calculator },
+      { to: '/invoices', label: 'Invoices & Billing', icon: FileText },
+      { to: '/payments', label: 'Payment Gateway', icon: CreditCard },
+    ];
+  };
+
+  const filteredItems = getNavItems();
 
   const linkClass = ({ isActive }) =>
     `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
@@ -134,13 +115,10 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* Bottom System Info */}
         <div className="pt-4 border-t border-slate-100">
           <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/60 text-xs">
-            <div className="flex items-center gap-1.5 font-semibold text-slate-800 mb-1">
+            <div className="flex items-center gap-1.5 font-semibold text-slate-800">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>RBAC Mode: {role}</span>
+              <span>Access Role: {role}</span>
             </div>
-            <p className="text-[11px] text-slate-500 leading-relaxed">
-              MERN Stack Architecture with authoritative backend billing calculation.
-            </p>
           </div>
         </div>
       </aside>

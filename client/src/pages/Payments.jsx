@@ -131,13 +131,15 @@ const Payments = () => {
       <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
         <div>
           <span className="text-xs uppercase font-extrabold tracking-wider text-blue-600">
-            Payment Reconciliation
+            {role === 'CUSTOMER' ? 'Personal Settlements' : role === 'SUPPORT' ? 'Support Desk Verification' : 'Payment Reconciliation'}
           </span>
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight mt-0.5">
-            Payment Gateway Transactions
+            {role === 'CUSTOMER' ? 'My Payment History & Receipts' : role === 'SUPPORT' ? 'Subscriber Payment Verification' : 'Payment Gateway Transactions'}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Idempotent gateway processing records indexed by <code className="font-mono text-blue-600">&#123; customerId: 1, createdAt: -1 &#125;</code>
+            {role === 'CUSTOMER'
+              ? 'Complete record of your payments, transaction receipts, and settled invoices.'
+              : ''}
           </p>
         </div>
 
@@ -158,10 +160,7 @@ const Payments = () => {
             <h3 className="font-bold text-white text-sm">
               Idempotency & Duplicate Payment Prevention
             </h3>
-            <p className="text-blue-200 text-xs mt-0.5">
-              Each checkout attempt passes a unique client <code className="font-mono bg-blue-950 px-1 py-0.5 rounded">idempotencyKey</code>. 
-              The backend ensures network retries never double-charge an invoice.
-            </p>
+            
           </div>
         </div>
         <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full">
