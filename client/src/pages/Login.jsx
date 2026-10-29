@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import Button from '../components/common/Button';
+import { authApi } from '../services/authApi';
 import {
   Radio,
   Shield,
@@ -12,7 +13,7 @@ import {
   AlertCircle,
   KeyRound,
   CheckCircle2,
-  Sparkles,
+  X,
 } from 'lucide-react';
 
 const Login = () => {
@@ -27,6 +28,13 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Password reset state
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState('prajakta2@gmail.com');
+  const [resetNewPassword, setResetNewPassword] = useState('Password@123');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetStatus, setResetStatus] = useState({ success: null, message: '' });
+
   const { login, register } = useAuth();
   const navigate = useNavigate();
 
@@ -34,26 +42,70 @@ const Login = () => {
     setSelectedRole(role);
     setError('');
     setIsRegister(false);
+    setShowResetModal(false);
 
     // Set sample registered email for the chosen role
     if (role === 'CUSTOMER') {
-      setFormData((prev) => ({
-        ...prev,
+      setFormData({
+        name: '',
         email: 'prajakta2@gmail.com',
         password: 'Password@123',
-      }));
+        phone: '+91 98765 43210',
+      });
+      setResetEmail('prajakta2@gmail.com');
     } else if (role === 'SUPPORT') {
-      setFormData((prev) => ({
-        ...prev,
+      setFormData({
+        name: '',
         email: 'support@telecom.com',
         password: 'Password@123',
-      }));
+        phone: '',
+      });
+      setResetEmail('support@telecom.com');
     } else if (role === 'ADMIN') {
-      setFormData((prev) => ({
-        ...prev,
+      setFormData({
+        name: '',
         email: 'admin@telecom.com',
         password: 'Password@123',
-      }));
+        phone: '',
+      });
+      setResetEmail('admin@telecom.com');
+    }
+  };
+
+  const handleResetPasswordSubmit = async (e) => {
+    if (e) e.preventDefault();
+    if (!resetEmail) {
+      setResetStatus({ success: false, message: 'Please provide account email address.' });
+      return;
+    }
+    setResetLoading(true);
+    setResetStatus({ success: null, message: '' });
+
+    try {
+      const res = await authApi.resetPassword({
+        email: resetEmail,
+        newPassword: resetNewPassword,
+      });
+      if (res.success) {
+        setResetStatus({ success: true, message: res.message });
+        // Automatically sync the login form password
+        setFormData((prev) => ({
+          ...prev,
+          email: resetEmail,
+          password: resetNewPassword,
+        }));
+        setTimeout(() => {
+          setShowResetModal(false);
+          setResetStatus({ success: null, message: '' });
+        }, 2500);
+      }
+    } catch (err) {
+      setResetStatus({
+        success: false,
+        message: err.message || 'Failed to reset password. Please verify the registered email.',
+      });
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -115,17 +167,24 @@ const Login = () => {
   const CurrentIcon = currentMeta.icon;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center p-4 sm:p-6 font-sans">
-      <div className="w-full max-w-lg">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-900 to-indigo-950 flex items-center justify-center p-4 sm:p-6 font-sans">
+      {/* Ambient background glow accents for modern telecom aesthetics */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative z-10 w-full max-w-lg">
         {/* Brand Banner */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-500/30 mb-3 ring-4 ring-blue-500/20">
-            <Radio className="w-7 h-7" />
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-500/30 ring-4 ring-blue-500/20">
+              <Radio className="w-6 h-6" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Nexus<span className="text-blue-400">Tel</span>
+            </h1>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Nexus<span className="text-blue-400">Tel</span>
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-300 mt-1">
+          <p className="text-xs sm:text-sm text-slate-300">
             Telecom Billing & Customer Management System
           </p>
         </div>
@@ -287,9 +346,25 @@ const Login = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Password
+                </label>
+                {!isRegister && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setResetEmail(formData.email || 'prajakta2@gmail.com');
+                      setShowResetModal(!showResetModal);
+                      setResetStatus({ success: null, message: '' });
+                    }}
+                    className="text-[11px] text-blue-600 hover:text-blue-800 font-semibold hover:underline flex items-center gap-1"
+                  >
+                    <KeyRound className="w-3 h-3" />
+                    {showResetModal ? 'Close Reset Form' : 'Reset / Forgot Password?'}
+                  </button>
+                )}
+              </div>
               <input
                 type="password"
                 name="password"
@@ -300,6 +375,91 @@ const Login = () => {
                 required
               />
             </div>
+
+            {/* Inline Password Reset Box */}
+            {showResetModal && (
+              <div className="p-3.5 bg-blue-50/60 border border-blue-200 rounded-2xl animate-in fade-in space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <KeyRound className="w-4 h-4 text-blue-600" />
+                    <span className="text-xs font-bold text-slate-800">
+                      Reset Password for {selectedRole} Account
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowResetModal(false)}
+                    className="text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {resetStatus.message && (
+                  <div
+                    className={`p-2.5 rounded-xl text-xs flex items-start gap-2 ${
+                      resetStatus.success
+                        ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                        : 'bg-rose-50 border border-rose-200 text-rose-800'
+                    }`}
+                  >
+                    {resetStatus.success ? (
+                      <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-600" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-600" />
+                    )}
+                    <span>{resetStatus.message}</span>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
+                    Account Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="Enter registered email"
+                    className="w-full text-xs px-3 py-1.5 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
+                    New Password (or click default)
+                  </label>
+                  <input
+                    type="text"
+                    value={resetNewPassword}
+                    onChange={(e) => setResetNewPassword(e.target.value)}
+                    placeholder="Enter new password (min 6 chars)"
+                    className="w-full text-xs px-3 py-1.5 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleResetPasswordSubmit}
+                    disabled={resetLoading}
+                    className="flex-1 py-1.5 px-3 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all disabled:opacity-50"
+                  >
+                    {resetLoading ? 'Resetting Password...' : 'Save & Set New Password'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setResetNewPassword('Password@123')}
+                    className="py-1.5 px-2.5 text-[11px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-100"
+                    title="Default password: Password@123"
+                  >
+                    Default
+                  </button>
+                </div>
+              </div>
+            )}
 
             <Button
               type="submit"
@@ -319,18 +479,6 @@ const Login = () => {
                 : `Log In as ${selectedRole.charAt(0) + selectedRole.slice(1).toLowerCase()}`}
             </Button>
           </form>
-
-          {/* Quick Pre-fill / Testing Note */}
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-            <span>Role verification enabled</span>
-            <button
-              type="button"
-              onClick={() => handleRoleTabChange(selectedRole)}
-              className="text-blue-600 hover:underline font-semibold"
-            >
-              Reset {selectedRole} Credentials
-            </button>
-          </div>
         </div>
       </div>
     </div>

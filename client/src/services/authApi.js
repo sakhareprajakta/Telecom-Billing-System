@@ -13,5 +13,11 @@ export const authApi = {
       body: JSON.stringify(userData),
     }),
 
+  resetPassword: (payload) =>
+    apiClient('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
   getMe: () => apiClient('/auth/me'),
 };

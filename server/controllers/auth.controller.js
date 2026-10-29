@@ -208,3 +208,33 @@ export const getMe = async (req, res, next) => {
     next(error);
   }
 };
+
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { email, newPassword = 'Password@123' } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Please provide email address.' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters.' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      return res.status(404).json({ success: false, message: `Account with email '${email}' was not found in the system.` });
+    }
+
+    user.passwordHash = await User.hashPassword(newPassword);
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Password for ${user.email} successfully reset to '${newPassword}'!`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
