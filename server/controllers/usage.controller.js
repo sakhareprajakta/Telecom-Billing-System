@@ -95,3 +95,54 @@ export const getUsageStats = async (req, res, next) => {
     next(error);
   }
 };
+
+export const simulateTraffic = async (req, res, next) => {
+  try {
+    const { customerId, customerCode } = req.body;
+    let customer;
+    if (customerId) {
+      customer = await Customer.findById(customerId);
+    } else if (customerCode) {
+      customer = await Customer.findOne({ customerCode: customerCode.toUpperCase() });
+    } else if (req.user && req.user.role === 'CUSTOMER') {
+      customer = await Customer.findOne({ userId: req.user._id });
+    } else {
+      customer = await Customer.findOne({ customerCode: 'CUST1001' });
+    }
+
+    if (!customer) {
+      return res.status(404).json({ success: false, message: 'Subscriber not found.' });
+    }
+
+    const currentPeriod = '2026-10';
+
+    const sampleEvents = [
+      { type: 'DATA', quantity: Number((Math.random() * 1.8 + 0.4).toFixed(1)), unit: 'GB' },
+      { type: 'VOICE', quantity: Math.floor(Math.random() * 35 + 5), unit: 'MINS' },
+      { type: 'SMS', quantity: Math.floor(Math.random() * 10 + 2), unit: 'SMS' },
+    ];
+
+    const inserted = [];
+    for (const ev of sampleEvents) {
+      const rec = await Usage.create({
+        customerId: customer._id,
+        type: ev.type,
+        quantity: ev.quantity,
+        unit: ev.unit,
+        usageDate: new Date(),
+        billingPeriod: currentPeriod,
+        charge: 0,
+        isBilled: false,
+      });
+      inserted.push(rec);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Simulated ${inserted.length} real-time telecom network events for ${customer.customerCode}.`,
+      data: inserted,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

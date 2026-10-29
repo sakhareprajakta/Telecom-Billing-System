@@ -14,6 +14,8 @@ import {
   Filter,
   RefreshCw,
   Database,
+  Zap,
+  Download,
 } from 'lucide-react';
 
 const Usage = () => {
@@ -25,6 +27,42 @@ const Usage = () => {
   const [billingPeriod, setBillingPeriod] = useState('2026-10');
   const [summary, setSummary] = useState([]);
   const [showLogModal, setShowLogModal] = useState(false);
+  const [simulating, setSimulating] = useState(false);
+
+  const handleSimulateStream = async () => {
+    try {
+      setSimulating(true);
+      await usageApi.simulateTraffic();
+      await fetchUsageData(1);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSimulating(false);
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (records.length === 0) return;
+    const headers = ['Timestamp', 'SubscriberCode', 'Type', 'Quantity', 'Unit', 'BillingPeriod', 'Status'];
+    const rows = records.map((r) => [
+      new Date(r.usageDate).toISOString(),
+      r.customerId?.customerCode || 'CUST1001',
+      r.type,
+      r.quantity,
+      r.unit,
+      r.billingPeriod,
+      r.isBilled ? 'BILLED' : 'UNBILLED',
+    ]);
+    const csvContent = [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `CDR_Usage_${billingPeriod || 'all'}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const fetchUsageData = async (page = 1) => {
     try {
@@ -142,7 +180,26 @@ const Usage = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            icon={Download}
+            onClick={handleExportCSV}
+            disabled={records.length === 0}
+          >
+            Export CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            icon={Zap}
+            loading={simulating}
+            onClick={handleSimulateStream}
+            className="text-amber-700 hover:bg-amber-50 border-amber-200"
+          >
+            Simulate Traffic Stream
+          </Button>
           <Button variant="outline" size="sm" icon={RefreshCw} onClick={() => fetchUsageData(1)}>
             Refresh
           </Button>
@@ -152,7 +209,7 @@ const Usage = () => {
             icon={Plus}
             onClick={() => setShowLogModal(true)}
           >
-            Simulate CDR Event
+            Log CDR Event
           </Button>
         </div>
       </div>

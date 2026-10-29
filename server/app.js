@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import authRoutes from './routes/auth.routes.js';
 import customerRoutes from './routes/customer.routes.js';
@@ -38,13 +40,23 @@ app.use('/api/invoices', invoiceRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/reports', reportRoutes);
 
-// Catch-all 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    statusCode: 404,
-    message: `API route not found: ${req.method} ${req.originalUrl}`,
-  });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve compiled React frontend in production
+const clientDist = path.join(__dirname, '../client/dist');
+app.use(express.static(clientDist));
+
+// Catch-all handler: for API routes return 404 JSON, for page routes return React index.html
+app.get('*', (req, res, next) => {
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(404).json({
+      success: false,
+      statusCode: 404,
+      message: `API route not found: ${req.method} ${req.originalUrl}`,
+    });
+  }
+  res.sendFile(path.join(clientDist, 'index.html'));
 });
 
 // Centralized Error Handling Middleware (Page 11)

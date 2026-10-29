@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:8.0
+    container_name: telecom-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - telecom-db-data:/data/db
+    networks:
+      - telecom-network
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: telecom-server
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongodb:27017/telecom_billing
+      - JWT_SECRET=telecom_billing_secret_key_super_secure_2026
+      - NODE_ENV=production
+    depends_on:
+      - mongodb
+    networks:
+      - telecom-network
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: telecom-client
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - telecom-network
+
+volumes:
+  telecom-db-data:
+
+networks:
+  telecom-network:
+    driver: bridge

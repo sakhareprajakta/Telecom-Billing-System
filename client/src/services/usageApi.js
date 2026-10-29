@@ -16,4 +16,10 @@ export const usageApi = {
     const query = new URLSearchParams(params).toString();
     return apiClient(`/usage/stats${query ? `?${query}` : ''}`);
   },
+
+  simulateTraffic: (data = {}) =>
+    apiClient('/usage/simulate', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };
